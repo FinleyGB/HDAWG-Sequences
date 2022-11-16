@@ -134,6 +134,7 @@ with open(HDAWG_filename, "r") as file:
     )
 
 awgMod.compile(device, awg_program)
+awgMod.upload_command_table(device, command_table='CT_Rabi_freq_YSO_1_half_to_1_half')
 
 # Set HDAWG parameters/settings
 

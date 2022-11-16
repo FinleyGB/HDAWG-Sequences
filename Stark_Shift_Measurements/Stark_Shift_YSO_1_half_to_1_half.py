@@ -63,11 +63,11 @@ rect_pulse = np.ones((1,rectSamples_stark))
 
 if command_table==1:
     # Save Location 
-    # save_directory ='C:/Codes/measurements/libs/QPLser/ZI_HDAWG_Scripts/Command_Tables/'
+    # save_directory ='C:/Codes/measurements/libs/QPLser/ZI_HDAWG_Scripts/Command_Tables/' # Directory for Lab PC
     save_directory = 'C:/Users/fdg2/Documents/HDAWG Pulse Sequences/HDAWG Sequences/Stark_Shift_Measurements/'
 
     # file name
-    file_name= 'CT_Stark_shift_1_half_to_1_half'
+    file_name= 'CT_Stark_shift_YSO_1_half_to_1_half'
     # Open the file
     f = open(os.path.join(save_directory+ file_name), 'w')
     # Write the basic intro of the file
