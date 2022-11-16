@@ -47,14 +47,15 @@ shuffle_duration=10e-3 # s; shuffling time
 
 # AFC Pulse Train Parameters
 Number_of_AFC_pulses = 50 # Number of repetitions of AFC preperation pulse train
-centre_freq_AFC = 247.6E6 # Centre frequency of AFC preparation pulses
-AFC_amplitude = 0.21 # Maximum amplitde of AFC pulse train
-AFC_duration = 2e-3 # Total time of AFC pulse train
+centre_freq_AFC = 247.6E6 # Hz; Centre frequency of AFC preparation pulses
+AFC_amplitude = 0.21 # V; Maximum amplitde of AFC pulse train
+AFC_duration = 2e-3 # s; Total time of AFC pulse train
 AFC_samples = round(AFC_duration*sampling_rate)
-AFC_pulse_width = 500e-9 # Width of each pulse in the pulse train (defined from AOM response time)
+AFC_pulse_width = 500e-9 # s; Width of each pulse in the pulse train (defined from AOM response time)
 AFC_pulse_width_samples = round(AFC_pulse_width*sampling_rate)
-time_between_pulses = 0.3e-3 # Time between reapeted AFC pulse train
-# AFC_pulse_train = np.linspace(0,1,AFC_duration*sampling_rate) # AFC pulse train waveform derived from external script
+time_between_pulses = 0.3e-3 # s; Time between reapeted AFC pulse train
+
+# Claculate Optimal AFC
 
 OD = 1 # Optical depth of absorption
 tau = 5e-6 # Storage time of AFC
