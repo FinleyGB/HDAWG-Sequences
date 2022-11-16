@@ -1,0 +1,120 @@
+{{
+
+    //// Common Parameter Definition
+    //Clock Parameters
+    const sampling_rate={sampling_rate}; // Hz; Sampling rate, should be the same as what you set on the right panel!
+
+    // Burning Pulse Parameters
+    const Number_of_burning_pulses = {Number_of_burning_pulses}; //Number of burning pulse repetitions  
+    const centre_freq_burning={centre_freq_burning}; //Hz; Central frequency set to drive the AOM for burning 
+    const chirpAmplitude_burning = {chirpAmplitude_burning};// V; amplitude of burning pulse 
+    const freq_sweeping_burning={freq_sweeping_burning};//Hz; set the scanning frequency range of burning pulse (the actual scanning range should be 4*freq_detuning)
+    const burning_duration={burning_duration}; //s; burning time 
+    const startFreq_burning = (centre_freq_burning-freq_sweeping_burning)/sampling_rate;//Hz; starting frequency of the burning pulse 
+    const stopFreq_burning = (centre_freq_burning+freq_sweeping_burning)/sampling_rate;//Hz; ending frequency of the burning pulse 
+    const chirpSamples_burning = round(burning_duration*sampling_rate/16)*16;// Calculating sampling points 
+    const phase = 0;
+
+    // burning Back Pulse Parameters
+    const Number_of_burning_back_pulses = {Number_of_burning_back_pulses}; //Number of burn-back pulse repetitions 
+    const centre_freq_burning_back={centre_freq_burning_back}; //Hz; Central frequency set to drive the AOM for burn-back
+    const chirpAmplitude_burning_back = {chirpAmplitude_burning_back};// V; amplitude of burn-back
+    const freq_sweeping_burning_back={freq_sweeping_burning_back};//Hz; set the scanning frequency range of burn-back (the actual scanning range should be 4*freq_detuning)
+    const burning_back_duration={burning_back_duration}; //s; burning time burn-back
+    const startFreq_burning_back = (centre_freq_burning_back-freq_sweeping_burning_back)/sampling_rate;//Hz; starting frequency of the burn-back
+    const stopFreq_burning_back = (centre_freq_burning_back+freq_sweeping_burning_back)/sampling_rate;//Hz; ending frequency of the burn-back
+    const chirpSamples_burning_back = round(burning_back_duration*sampling_rate/16)*16;// Calculating sampling points 
+
+    // Cleaning Pulse Parameters
+    const Number_of_cleaning_pulses = {Number_of_cleaning_pulses}; //Number of clean pulse repetitions 
+    const centre_freq_cleaning={centre_freq_cleaning}; //Hz; Central frequency set to drive the AOM for cleaning
+    const chirpAmplitude_cleaning = {chirpAmplitude_cleaning};// V; amplitude of cleaning
+    const freq_sweeping_cleaning={freq_sweeping_cleaning};//Hz; set the scanning frequency range of cleaning (the actual scanning range should be 4*freq_detuning)
+    const cleaning_duration={cleaning_duration}; //s; burning time cleaning
+    const startFreq_cleaning = (centre_freq_cleaning-freq_sweeping_cleaning)/sampling_rate;//Hz; starting frequency of the burn-back
+    const stopFreq_cleaning  = (centre_freq_cleaning+freq_sweeping_cleaning)/sampling_rate;//Hz; ending frequency of the burn-back
+    const chirpSamples_cleaning = round(cleaning_duration*sampling_rate/16)*16;// Calculating sampling points
+
+    // Rabi Pulse Parameters
+    const Number_of_Rabi_Pulses = {Number_of_Rabi_Pulses};  //Number of Rabi freq measurements
+    const centre_freq_rabi = {centre_freq_rabi};    //Hz; Central freq set to dive AOM for Rabi measurment pulse
+    const nrOfPeriods_rabi = rabi_duration*centre_freq_rabi; // Number of periods of sine inside rabi pulse
+    const rabi_duration = {rabi_duration};  //s; Pulse duration of rabi measurment pulse
+    const samples_rabi = round(rabi_duration*sampling_rate/16)*16; // Calculating sampling points 
+
+    // Shuffle Pulse Parameters
+    const centre_freq_shuffle={centre_freq_shuffle};//Hz; Central frequency of the shuffle pulse
+    const chirpAmplitude_shuffle = {chirpAmplitude_shuffle};// V; amplitude of shuffling pulse
+    const freq_sweeping_shuffle={freq_sweeping_shuffle};//Hz; set the scanning frequency range of shuffling pulse
+    const shuffle_duration={shuffle_duration};//s; shufling time
+    const startFreq_shuffle = (centre_freq_shuffle-freq_sweeping_shuffle)/sampling_rate;//Hz; starting frequency of the shuffling pulse
+    const stopFreq_shuffle = (centre_freq_shuffle+freq_sweeping_shuffle)/sampling_rate;//Hz; ending frequency of the shuffling pulse
+    const chirpSamples_shuffle =round(shuffle_duration*sampling_rate/16)*16;// Calculating sampling points
+
+    //// Waveform Definitions
+    wave chirpedSine_burning = chirpAmplitude_burning*chirp(chirpSamples_burning,1,startFreq_burning,stopFreq_burning,phase); //burning pulse with marker appended
+    wave chirpedSine_burning_1 = chirpAmplitude_burning*chirp(chirpSamples_burning,1,startFreq_burning,stopFreq_burning, phase); //burning pulse without marker appended
+    wave chirpedSine_burning_back = chirpAmplitude_burning_back*chirp(chirpSamples_burning_back,1,startFreq_burning_back,stopFreq_burning_back, phase); //burnback pulse 
+    wave chirpedSine_shuffle = chirpAmplitude_shuffle*chirp(chirpSamples_shuffle,1,startFreq_shuffle,stopFreq_shuffle, phase); //shuffle pulse
+
+    wave Sine_rabi = sine(samples_rabi,1,phase,nrOfPeriods_rabi);    //Rabi Pulse 
+    assignWaveIndex(1,Sine_rabi,10);
+
+    //// Pulses Sequence
+    for(i = 0; i < Number_of_Rabi_Pulses; i++){{
+
+        // Burning Pulses
+        const delay_00 = 0.3E-3; //s; time delay between repeated burning pulses 
+        const sample_delay_00=round(delay_00*sampling_rate/16)*16;
+
+        repeat (Number_of_burning_pulses) {{
+            playWave(chirpedSine_burning);
+            playZero(sample_delay_00);
+        }}
+
+        // Wait between burning and burning back pulses
+        const delay_01=0.3E-3; //s; time delay between the burning pulses and burn-back
+        const sample_delay_01=round(delay_01*sampling_rate/16)*16;
+        playZero(sample_delay_01);
+
+        // Burning Back Pulses
+        const delay_02 = 0.3E-3; //s; time delay between repeated burn-back pulses
+        const sample_delay_02=round(delay_02*sampling_rate/16)*16;
+
+        repeat(Number_of_burning_back_pulses) {{
+            playWave(chirpedSine_burning_back);
+            playZero(sample_delay_02);
+        }}
+
+        // Cleaning Pulses
+        const delay_04 = 0.3E-3; //s; time delay between repeated clean pulses
+        const sample_delay_04=round(delay_04*sampling_rate/16)*16;
+
+        repeat(Number_of_cleaning_pulses){{
+            playWave(chirpedSine_cleaning);
+            playZero(sample_delay_04);
+        }}
+
+        // Wait between cleaning and Rabi Pulse
+        const delay_05=1E-3; //s; time delay between the clean and AFC pulse train
+        const sample_delay_05=round(delay_05*sampling_rate/16)*16;
+        playZero(sample_delay_05);
+
+        // Readout and Rabi Pulse
+        excecuteTableEntry(i);
+
+        // Wait between readout and shuffle pulse
+        const delay_06=20E-3;//s; time delay between the read-out pulse and shuffle pulse
+        const sample_delay_06=round(delay_06*sampling_rate/16)*16;
+        playZero(sample_delay_06);
+
+        // Shuffle Pulse
+        playWave(chirpedSine_shuffle);
+
+        // Wait between shuffle pulse and burning pulse
+        const delay_07=40E-3;//s; time delay between the shuffle pulse and burning pulse
+        const sample_delay_07=round(delay_07*sampling_rate/16)*16;
+        playZero(sample_delay_07);
+    }}
+
+}}
