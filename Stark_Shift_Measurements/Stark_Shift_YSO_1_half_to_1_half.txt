@@ -69,6 +69,7 @@
     wave Stark_Shift_Pulse = placeholder(chirpSamples_reading,true,true); //stark shift pulse
     assignWaveIndex(1,chirpedSine_reading,3,Stark_Shift_Pulse,10);
 
+    cvar i;
     for(i = 0; i < Number_of_stark_shifts; i++){{
         //// Pulse Sequence
 
