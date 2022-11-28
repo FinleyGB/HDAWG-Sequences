@@ -38,11 +38,11 @@
     // Readout Pulse Parameters
     const centre_freq_reading = {centre_freq_reading};    //Hz; Central freq set to dive AOM for readout pulse
     const freq_sweeping_reading ={freq_sweeping_reading};//Hz; set the scanning frequency range of readout pulse
+    const reading_duration = {reading_duration};  //s; Pulse duration of Readout measurment pulse
     const startFreq_reading = (centre_freq_reading-freq_sweeping_reading)/sampling_rate;//Hz; starting frequency of the readout pulse
     const stopFreq_reading = (centre_freq_reading+freq_sweeping_reading)/sampling_rate;//Hz; ending frequency of the readout pulse
     const nrOfPeriods_reading = reading_duration*centre_freq_reading; // Number of periods of sine inside readout pulse
     const chirpAmplitude_reading = {chirpAmplitude_reading}; //V; amplitude of readout pulse
-    const reading_duration = {reading_duration};  //s; Pulse duration of Readout measurment pulse
     const chirpSamples_reading = round(reading_duration*sampling_rate/16)*16; // Calculating sampling points 
 
     // Shuffle Pulse Parameters
@@ -62,64 +62,63 @@
 
     wave chirpedSine_burning = chirpAmplitude_burning*chirp(chirpSamples_burning,1,startFreq_burning,stopFreq_burning,phase); //burning pulse with marker appended
     wave chirpedSine_burning_back = chirpAmplitude_burning_back*chirp(chirpSamples_burning_back,1,startFreq_burning_back,stopFreq_burning_back, phase); //burnback pulse 
-    wave chirpedSine_reading = chirpAmplitude_reading*chirp(chirpSamples_reading,1,startFreq_reading,stopFreq_reading, phase); //Readout Pulse
+    wave chirpedSine_reading = chirpAmplitude_reading*chirp(chirpSamples_reading,1,startFreq_reading,stopFreq_reading, phase) + w_marker; //Readout Pulse
     wave chirpedSine_shuffle = chirpAmplitude_shuffle*chirp(chirpSamples_shuffle,1,startFreq_shuffle,stopFreq_shuffle, phase); //shuffle pulse
+    wave chirpedSine_cleaning = chirpAmplitude_cleaning*chirp(chirpSamples_cleaning,1,startFreq_cleaning,stopFreq_cleaning, phase);   //Cleaning Pulse
 
     //// Pulses Sequence
-    for(i = 0; i < Number_of_Rabi_Pulses; i++){{
+    // Burning Pulses
+    const delay_00 = 0.3E-3; //s; time delay between repeated burning pulses 
+    const sample_delay_00=round(delay_00*sampling_rate/16)*16;
 
-        // Burning Pulses
-        const delay_00 = 0.3E-3; //s; time delay between repeated burning pulses 
-        const sample_delay_00=round(delay_00*sampling_rate/16)*16;
+    repeat (Number_of_burning_pulses) {{
+        playWave(chirpedSine_burning);
+        playZero(sample_delay_00);
+    }}
 
-        repeat (Number_of_burning_pulses) {{
-            playWave(chirpedSine_burning);
-            playZero(sample_delay_00);
-        }}
+    // Wait between burning and burning back pulses
+    const delay_01=0.3E-3; //s; time delay between the burning pulses and burn-back
+    const sample_delay_01=round(delay_01*sampling_rate/16)*16;
+    playZero(sample_delay_01);
 
-        // Wait between burning and burning back pulses
-        const delay_01=0.3E-3; //s; time delay between the burning pulses and burn-back
-        const sample_delay_01=round(delay_01*sampling_rate/16)*16;
-        playZero(sample_delay_01);
+    // Burning Back Pulses
+    const delay_02 = 0.3E-3; //s; time delay between repeated burn-back pulses
+    const sample_delay_02=round(delay_02*sampling_rate/16)*16;
 
-        // Burning Back Pulses
-        const delay_02 = 0.3E-3; //s; time delay between repeated burn-back pulses
-        const sample_delay_02=round(delay_02*sampling_rate/16)*16;
+    repeat(Number_of_burning_back_pulses) {{
+        playWave(chirpedSine_burning_back);
+        playZero(sample_delay_02);
+    }}
 
-        repeat(Number_of_burning_back_pulses) {{
-            playWave(chirpedSine_burning_back);
-            playZero(sample_delay_02);
-        }}
+    // Cleaning Pulses
+    const delay_04 = 0.3E-3; //s; time delay between repeated clean pulses
+    const sample_delay_04=round(delay_04*sampling_rate/16)*16;
 
-        // Cleaning Pulses
-        const delay_04 = 0.3E-3; //s; time delay between repeated clean pulses
-        const sample_delay_04=round(delay_04*sampling_rate/16)*16;
+    repeat(Number_of_cleaning_pulses){{
+        playWave(chirpedSine_cleaning);
+        playZero(sample_delay_04);
+    }}
 
-        repeat(Number_of_cleaning_pulses){{
-            playWave(chirpedSine_cleaning);
-            playZero(sample_delay_04);
-        }}
+    // Wait between cleaning and Rabi Pulse
+    const delay_05=1E-3; //s; time delay between the clean and AFC pulse train
+    const sample_delay_05=round(delay_05*sampling_rate/16)*16;
+    playZero(sample_delay_05);
 
-        // Wait between cleaning and Rabi Pulse
-        const delay_05=1E-3; //s; time delay between the clean and AFC pulse train
-        const sample_delay_05=round(delay_05*sampling_rate/16)*16;
-        playZero(sample_delay_05);
+    // Readout
+    playWave(chirpedSine_reading);
 
-        // Readout and Rabi Pulse
-        playWave(chirpedSine_reading);
+    // Wait between readout and shuffle pulse
+    const delay_06=20E-3;//s; time delay between the read-out pulse and shuffle pulse
+    const sample_delay_06=round(delay_06*sampling_rate/16)*16;
+    playZero(sample_delay_06);
 
-        // Wait between readout and shuffle pulse
-        const delay_06=20E-3;//s; time delay between the read-out pulse and shuffle pulse
-        const sample_delay_06=round(delay_06*sampling_rate/16)*16;
-        playZero(sample_delay_06);
-
-        // Shuffle Pulse
-        playWave(chirpedSine_shuffle);
+    // Shuffle Pulse
+    playWave(chirpedSine_shuffle);
 
         // Wait between shuffle pulse and burning pulse
-        const delay_07=40E-3;//s; time delay between the shuffle pulse and burning pulse
-        const sample_delay_07=round(delay_07*sampling_rate/16)*16;
-        playZero(sample_delay_07);
-    }}
+    const delay_07=40E-3;//s; time delay between the shuffle pulse and burning pulse
+    const sample_delay_07=round(delay_07*sampling_rate/16)*16;
+    playZero(sample_delay_07);
+
 
 }}

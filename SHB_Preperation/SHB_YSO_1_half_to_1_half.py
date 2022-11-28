@@ -1,8 +1,4 @@
-import zhinst.utils as zu
-import numpy as np
-import os
 from measurements.libs.QPLser.AWGmanager import HDAWG_PLser
-from scipy.signal import chirp
 
 ## Initialise HDAWG System ##
 device = 'dev8416'  # Device ID for G14
@@ -33,7 +29,7 @@ chirpAmplitude_cleaning = 0.05 #  V; amplitude of cleaning
 freq_sweeping_cleaning=1E6 # Hz; set the scanning frequency range of cleaning (the actual scanning range should be 4*freq_detuning)
 cleaning_duration=0.5e-3 # s; burning time cleaning
 
-# Rabi Pulse Parameters
+# Reading Pulse Parameters
 centre_freq_reading=250E6 # Hz; Central frequency set to read out the burned spectral hole
 chirpAmplitude_reading = 0.03 # V; amplitude of reading-out pulse
 freq_sweeping_reading=5E6 # Hz; set the scanning frequency range of reading-out pulse (the actual scanning range should be 4*freq_detuning) 1.32877326E6
@@ -46,7 +42,7 @@ freq_sweeping_shuffle=20E6 # Hz; set the scanning frequency range of shuffling p
 shuffle_duration=10e-3 # s; shuffling time
 
 # Load sequence file
-HDAWG_filename = ('C:\Codes\HDAWG\Sequences\SHB_YSO_1_half_to_1_half.txt')
+HDAWG_filename = ('C:\HDAWG_control\HDAWG-Sequences\SHB_Preperation\SHB_YSO_1_half_to_1_half.txt')
 
 with open(HDAWG_filename, "r") as file:
     awg_string = file.read()
@@ -86,7 +82,7 @@ with open(HDAWG_filename, "r") as file:
         centre_freq_shuffle = centre_freq_shuffle,
         chirpAmplitude_shuffle = chirpAmplitude_shuffle,
         freq_sweeping_shuffle = freq_sweeping_shuffle,
-        shuffle_duration = shuffle_duration,
+        shuffle_duration = shuffle_duration
     )
 
 awgMod.compile(device, awg_program)
@@ -100,7 +96,7 @@ awgMod.set_value(f"/{device}/triggers/out/0/source", 4) # set up trigger, Output
 # Setup output channels
 awgMod.set_value(f"/{device}/sigouts/0/on", 1) # Channel 1 is ON
 awgMod.set_value(f"/{device}/sigouts/1/on", 0) # Channel 2 is OFF
-awgMod.set_value(f"/{device}/sigouts/2/on", 0) # Channel 3 is ON
+awgMod.set_value(f"/{device}/sigouts/2/on", 0) # Channel 3 is OFF
 awgMod.set_value(f"/{device}/sigouts/3/on", 0) # Channel 4 is OFF
 
 awgMod.set_value(f"/{device}/awgs/0/single",0) #Rerun sequence
