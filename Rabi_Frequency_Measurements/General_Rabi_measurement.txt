@@ -1,0 +1,36 @@
+{{
+    const sampling_rate={sampling_rate}; // Hz; Sampling rate, should be the same as what you set on the right panel!
+    const centre_freq={centre_freq}; //Hz; Central frequency set to drive the AOM for the long pulse for Rabi measurement
+
+    const amplitude = {amplitude}; // V; amplitude of long pulse
+    const pulse_duration = {pulse_duration}; // s; Long pulse duration 
+    const phaseOffset = 0.0;
+    const nrOfPeriods = pulse_duration*centre_freq; // Number of periods of sine inside the long pulse
+    const samples=round(pulse_duration*sampling_rate/16)*16; // Calculating sampling points 
+
+    const centre_freq_shuffle={centre_freq_shuffle};//Hz; Central frequency of the shuffle pulse
+    const chirpAmplitude_shuffle = {chirpAmplitude_shuffle};// V; amplitude of shuffling pulse
+    const freq_sweeping_shuffle={freq_sweeping_shuffle};//Hz; set the scanning frequency range of shuffling pulse
+    const shuffle_duration={shuffle_duration};//s; shufling time
+    const startFreq_shuffle = (centre_freq_shuffle-freq_sweeping_shuffle)/sampling_rate;//Hz; starting frequency of the shuffling pulse
+    const stopFreq_shuffle  = (centre_freq_shuffle+freq_sweeping_shuffle)/sampling_rate;//Hz; ending frequency of the shuffling pulse
+    const chirpSamples_shuffle =round(shuffle_duration*sampling_rate/16)*16;// Calculating sampling points 
+    const phase=0;
+
+    wave marker_left=marker(0,0);
+    wave marker_middle=marker(chirpSamples_shuffle/16,1);
+    wave marker_right=marker(chirpSamples_shuffle/2, 0);
+    wave w_marker=join(marker_left,marker_middle,marker_right);
+
+    wave sine = amplitude*sine(samples, 1, phaseOffset, nrOfPeriods)+w_marker;
+    wave chirpedSine_shuffle = chirpAmplitude_shuffle*chirp(chirpSamples_shuffle,1,startFreq_shuffle,stopFreq_shuffle, phase); //shuffle pulse
+
+    const delay_00 = 10E-3; //s; time delay between repeated burning pulses 
+    const sample_delay_00=round(delay_00*sampling_rate/16)*16;
+
+    playWave(sine);
+    playZero(sample_delay_00);
+    playWave(chirpedSine_shuffle);
+    playZero(sample_delay_00);
+    
+}}
