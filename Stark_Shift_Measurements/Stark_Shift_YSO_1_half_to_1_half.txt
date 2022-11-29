@@ -69,6 +69,7 @@
     wave Stark_Shift_Pulse = placeholder(chirpSamples_reading,true,true); //stark shift pulse
     assignWaveIndex(1,chirpedSine_reading,3,Stark_Shift_Pulse,10);
 
+    cvar i;
     for(i = 0; i < Number_of_stark_shifts; i++){{
         //// Pulse Sequence
 
@@ -115,7 +116,7 @@
         playZero(sample_delay_05);
 
         // Readout and Stark Shift Pulses
-        excecuteTableEntry(i);
+        executeTableEntry(i);
 
         // Wait between readout and shuffle pulse
         const delay_06=20E-3;//s; time delay between the read-out pulse and shuffle pulse
