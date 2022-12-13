@@ -39,7 +39,7 @@ Number_of_Rabi_Pulses = 10 # Number of Rabi freq measurements
 centre_freq_rabi = 250e6 # Hz; Central freq set to dive AOM for Rabi measurment pulse
 rabi_duration = 1e-3 # s; Pulse duration of rabi measurment pulse
 amplitude_rabi_max = 0.21 # V; amplitude of rabi measurement pusle
-amplitude_rabi_min = 0.10 # V; amplitude of rabi measurement pusle
+amplitude_rabi_min = 0.0 # V; amplitude of rabi measurement pusle
 
 # Shuffle Pulse Parameters
 centre_freq_shuffle=250E6 # Hz; Central frequency of the shuffle pulse
@@ -51,8 +51,7 @@ shuffle_duration=10e-3 # s; shuffling time
 
 if command_table==1:
     # Save Location 
-    # save_directory ='C:/Codes/measurements/libs/QPLser/ZI_HDAWG_Scripts/Command_Tables/' # Directory for Lab PC
-    save_directory = 'C:/Users/fdg2/Documents/HDAWG Pulse Sequences/HDAWG Sequences/Rabi_Frequency_Measurements/'
+    save_directory = 'C:/HDAWG_control/measurements/libs/QPLser/ZI_HDAWG_Scripts/Command_Tables/'
 
     # file name
     file_name= 'CT_Rabi_freq_YSO_1_half_to_1_half'
@@ -91,7 +90,7 @@ if command_table==1:
     f.close() 
 
 # Load sequence file
-HDAWG_filename = ('C:\Codes\HDAWG\Sequences\Rabi_freq_YSO_1_half_to_1_half.txt')
+HDAWG_filename = ('C:\\HDAWG_control\\HDAWG-Sequences\\Rabi_Frequency_Measurements\\Rabi_freq_YSO_1_half_to_1_half.txt')
 
 with open(HDAWG_filename, "r") as file:
     awg_string = file.read()

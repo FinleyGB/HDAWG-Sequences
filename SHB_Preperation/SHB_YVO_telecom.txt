@@ -91,18 +91,18 @@
     }}
 
     // Cleaning Pulses
-    const delay_04 = 0.3E-3; //s; time delay between repeated clean pulses
-    const sample_delay_04=round(delay_04*sampling_rate/16)*16;
+    //const delay_04 = 0.3E-3; //s; time delay between repeated clean pulses
+    //const sample_delay_04=round(delay_04*sampling_rate/16)*16;
 
-    repeat(Number_of_cleaning_pulses){{
-        playWave(chirpedSine_cleaning);
-        playZero(sample_delay_04);
-    }}
+    //repeat(Number_of_cleaning_pulses){{
+    //    playWave(chirpedSine_cleaning);
+    //    playZero(sample_delay_04);
+    //}}
 
     // Wait between cleaning and Rabi Pulse
-    const delay_05=1E-3; //s; time delay between the clean and AFC pulse train
-    const sample_delay_05=round(delay_05*sampling_rate/16)*16;
-    playZero(sample_delay_05);
+    //const delay_05=1E-3; //s; time delay between the clean and AFC pulse train
+    //const sample_delay_05=round(delay_05*sampling_rate/16)*16;
+    //playZero(sample_delay_05);
 
     // Readout
     playWave(chirpedSine_reading);

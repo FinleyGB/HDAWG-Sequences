@@ -38,8 +38,8 @@
     // Rabi Pulse Parameters
     const Number_of_Rabi_Pulses = {Number_of_Rabi_Pulses};  //Number of Rabi freq measurements
     const centre_freq_rabi = {centre_freq_rabi};    //Hz; Central freq set to dive AOM for Rabi measurment pulse
-    const nrOfPeriods_rabi = rabi_duration*centre_freq_rabi; // Number of periods of sine inside rabi pulse
     const rabi_duration = {rabi_duration};  //s; Pulse duration of rabi measurment pulse
+    const nrOfPeriods_rabi = rabi_duration*centre_freq_rabi; // Number of periods of sine inside rabi pulse
     const samples_rabi = round(rabi_duration*sampling_rate/16)*16; // Calculating sampling points 
 
     // Shuffle Pulse Parameters
@@ -52,15 +52,22 @@
     const chirpSamples_shuffle =round(shuffle_duration*sampling_rate/16)*16;// Calculating sampling points
 
     //// Waveform Definitions
+    wave marker_left=marker(samples_rabi/2,0);
+    wave marker_middle=marker(samples_rabi/16,1);
+    wave marker_right=marker(samples_rabi/2, 0);
+    wave w_marker=join(marker_left,marker_middle,marker_right);
+
     wave chirpedSine_burning = chirpAmplitude_burning*chirp(chirpSamples_burning,1,startFreq_burning,stopFreq_burning,phase); //burning pulse with marker appended
     wave chirpedSine_burning_1 = chirpAmplitude_burning*chirp(chirpSamples_burning,1,startFreq_burning,stopFreq_burning, phase); //burning pulse without marker appended
     wave chirpedSine_burning_back = chirpAmplitude_burning_back*chirp(chirpSamples_burning_back,1,startFreq_burning_back,stopFreq_burning_back, phase); //burnback pulse 
+    wave chirpedSine_cleaning = chirpAmplitude_cleaning*chirp(chirpSamples_cleaning,1,startFreq_cleaning,stopFreq_cleaning, phase); //burnback pulse 
     wave chirpedSine_shuffle = chirpAmplitude_shuffle*chirp(chirpSamples_shuffle,1,startFreq_shuffle,stopFreq_shuffle, phase); //shuffle pulse
 
-    wave Sine_rabi = sine(samples_rabi,1,phase,nrOfPeriods_rabi);    //Rabi Pulse 
+    wave Sine_rabi = sine(samples_rabi,1,phase,nrOfPeriods_rabi) + w_marker;    //Rabi Pulse 
     assignWaveIndex(1,Sine_rabi,10);
 
     //// Pulses Sequence
+    cvar i;
     for(i = 0; i < Number_of_Rabi_Pulses; i++){{
 
         // Burning Pulses
@@ -101,7 +108,7 @@
         playZero(sample_delay_05);
 
         // Readout and Rabi Pulse
-        excecuteTableEntry(i);
+        executeTableEntry(i);
 
         // Wait between readout and shuffle pulse
         const delay_06=20E-3;//s; time delay between the read-out pulse and shuffle pulse

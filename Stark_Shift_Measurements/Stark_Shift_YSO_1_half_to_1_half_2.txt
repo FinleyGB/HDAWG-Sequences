@@ -54,12 +54,16 @@
 
     // Stark Shift Pulse Parameters
     const Number_of_stark_shifts = {Number_of_stark_shifts}; // Number of stark shift E fields applied to the sample
-    const zero_pad_duration = {zero_pad_duration}; // s; time for electric field to turn on before reading pulse
-    const zero_pad_Samples = round(zero_pad_duration*sampling_rate/16)*16;
-
-    const Stark_Samples_total = 2*zero_pad_Samples + chirpSamples_reading;
+    const rect_amplitude_min = {rect_amplitude_max}; // V; Min amplitude of stark shift pulse
+    const rect_amplitude_max = {rect_amplitude_max}; // V; Max amplitude of stark shift pulse
+    const Stark_Shift_step = (rect_amplitude_max-rect_amplitude_min)/Number_of_stark_shifts;
 
     //// Waveform Definitions
+
+    wave marker_left=marker(chirpSamples_reading/2,0);
+    wave marker_middle=marker(chirpSamples_reading/16,1);
+    wave marker_right=marker(chirpSamples_reading/2, 0);
+    wave w_marker=join(marker_left,marker_middle,marker_right);
 
     wave chirpedSine_burning   = chirpAmplitude_burning*chirp(chirpSamples_burning,1,startFreq_burning,stopFreq_burning, phase); //burning pulse without marker appended
 
@@ -67,16 +71,17 @@
 
     wave chirpedSine_cleaning = chirpAmplitude_cleaning*chirp(chirpSamples_cleaning,1,startFreq_cleaning,stopFreq_cleaning, phase); //burnback pulse 
 
+    wave chirpedSine_reading = chirpAmplitude_reading*chirp(chirpSamples_reading,1,startFreq_reading,stopFreq_reading, phase)+w_marker; //read-out pulse
+
     wave chirpedSine_shuffle = chirpAmplitude_shuffle*chirp(chirpSamples_shuffle,1,startFreq_shuffle,stopFreq_shuffle, phase); //shuffle pulse
 
-    wave chirpedSine_reading = placeholder(Stark_Samples_total,true,false); //read-out pulse
-    wave Stark_Shift_Pulse = ones(Stark_Samples_total);
+    wave Stark_Shift_Pulse = ones(chirpSamples_reading);
 
-    assignWaveIndex(1, chirpedSine_reading, 3, Stark_Shift_Pulse, 4, Stark_Shift_Pulse, 10);
-    // assignWaveIndex(chirpedSine_reading, 10);
-    
+    assignWaveIndex(1, chirpedSine_reading, 2, Stark_Shift_Pulse, 3, Stark_Shift_Pulse, 4, Stark_Shift_Pulse, 10);
+
     cvar i;
-    for(i = 0; i < Number_of_stark_shifts; i++) {{
+
+    for (i = 0; i < Number_of_stark_shifts; i++) {{
         //// Pulse Sequence
 
         // Burning Pulses
@@ -122,10 +127,7 @@
         playZero(sample_delay_05);
 
         // Readout and Stark Shift Pulses
-        // setTrigger(1);
         executeTableEntry(i);
-        // setTrigger(0);
-        // playWave(1, chirpedSine_reading, 3, 4, Stark_Shift_Pulse);
 
         // Wait between readout and shuffle pulse
         const delay_06=20E-3;//s; time delay between the read-out pulse and shuffle pulse

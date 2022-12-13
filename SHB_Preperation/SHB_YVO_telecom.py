@@ -9,40 +9,40 @@ awgMod = HDAWG_PLser(device)
 sampling_rate=2.4E9 # Hz; Sampling rate, should be the same as what you set on the right panel!
 
 # Burning Pulse Parameters
-Number_of_burning_pulses = 300 # Number of burning pulse repetitions
-centre_freq_burning = 250E6 #Hz; Central frequency set to drive the AOM for burning
-chirpAmplitude_burning = 0.10 # V; amplitude of burning pulse
-freq_sweeping_burning=3.5E6 # Hz; set the scanning frequency range of burning pulse (the actual scanning range should be 4*freq_detuning)
-burning_duration=0.6e-3 # s; burning time
+Number_of_burning_pulses = 1 # Number of burning pulse repetitions
+centre_freq_burning = 80E6 #Hz; Central frequency set to drive the AOM for burning
+chirpAmplitude_burning = 0.0 # V; amplitude of burning pulse
+freq_sweeping_burning=0E6 # Hz; set the scanning frequency range of burning pulse (the actual scanning range should be 4*freq_detuning)
+burning_duration=2e-3 # s; burning time
 
 # Burning back Pulse Parameters
-Number_of_burning_back_pulses = 200 # Number of burn-back pulse repetitions 
-centre_freq_burning_back=263.75E6 # Hz; Central frequency set to drive the AOM for burn-back
-chirpAmplitude_burning_back = 0.047 # V; amplitude of burn-back
-freq_sweeping_burning_back=0.8e6 # Hz; set the scanning frequency range of burn-back (the actual scanning range should be 4*freq_detuning)
+Number_of_burning_back_pulses = 1 # Number of burn-back pulse repetitions 
+centre_freq_burning_back=80E6 # Hz; Central frequency set to drive the AOM for burn-back
+chirpAmplitude_burning_back = 0 # V; amplitude of burn-back
+freq_sweeping_burning_back=4e6 # Hz; set the scanning frequency range of burn-back (the actual scanning range should be 4*freq_detuning)
 burning_back_duration=0.1e-3 # s; burning time burn-back
 
 # Cleaning Pulse Parameters
 Number_of_cleaning_pulses = 260 # Number of clean pulse repetitions 
 centre_freq_cleaning=252.7E6 # Hz; Central frequency set to drive the AOM for cleaning
-chirpAmplitude_cleaning = 0.05 #  V; amplitude of cleaning
+chirpAmplitude_cleaning = 0 #  V; amplitude of cleaning
 freq_sweeping_cleaning=1E6 # Hz; set the scanning frequency range of cleaning (the actual scanning range should be 4*freq_detuning)
 cleaning_duration=0.5e-3 # s; burning time cleaning
 
 # Reading Pulse Parameters
-centre_freq_reading=250E6 # Hz; Central frequency set to read out the burned spectral hole
-chirpAmplitude_reading = 0.03 # V; amplitude of reading-out pulse
-freq_sweeping_reading=5E6 # Hz; set the scanning frequency range of reading-out pulse (the actual scanning range should be 4*freq_detuning) 1.32877326E6
+centre_freq_reading=80E6 # Hz; Central frequency set to read out the burned spectral hole
+chirpAmplitude_reading = 0.08 # V; amplitude of reading-out pulse
+freq_sweeping_reading=4E6 # Hz; set the scanning frequency range of reading-out pulse (the actual scanning range should be 4*freq_detuning) 1.32877326E6
 reading_duration=4e-3 # s; reading-out time
 
 # Shuffle Pulse Parameters
-centre_freq_shuffle=250E6 # Hz; Central frequency of the shuffle pulse
-chirpAmplitude_shuffle = 0.21 # V; amplitude of shuffling pulse
+centre_freq_shuffle=80E6 # Hz; Central frequency of the shuffle pulse
+chirpAmplitude_shuffle = 0.6 # V; amplitude of shuffling pulse
 freq_sweeping_shuffle=20E6 # Hz; set the scanning frequency range of shuffling pulse
 shuffle_duration=10e-3 # s; shuffling time
 
 # Load sequence file
-HDAWG_filename = ('C:\HDAWG_control\HDAWG-Sequences\SHB_Preperation\SHB_YSO_1_half_to_1_half.txt')
+HDAWG_filename = ('C:\HDAWG_control\HDAWG-Sequences\SHB_Preperation\SHB_YVO_telecom.txt')
 
 with open(HDAWG_filename, "r") as file:
     awg_string = file.read()
