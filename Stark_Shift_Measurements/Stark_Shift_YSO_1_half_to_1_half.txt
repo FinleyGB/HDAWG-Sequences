@@ -54,10 +54,14 @@
 
     // Stark Shift Pulse Parameters
     const Number_of_stark_shifts = {Number_of_stark_shifts}; // Number of stark shift E fields applied to the sample
+    const zero_pad_duration = {zero_pad_duration}; // s; time for electric field to turn on before reading pulse
+    const zero_pad_Samples = round(zero_pad_duration*sampling_rate/16)*16;
+
+    const Stark_Samples_total = 2*zero_pad_Samples + chirpSamples_reading;
 
     //// Waveform Definitions
 
-    wave chirpedSine_burning   = chirp(chirpSamples_burning,1,startFreq_burning,stopFreq_burning, phase); //burning pulse without marker appended
+    wave chirpedSine_burning   = chirpAmplitude_burning*chirp(chirpSamples_burning,1,startFreq_burning,stopFreq_burning, phase); //burning pulse without marker appended
 
     wave chirpedSine_burning_back = chirpAmplitude_burning_back*chirp(chirpSamples_burning_back,1,startFreq_burning_back,stopFreq_burning_back, phase); //burnback pulse
 
@@ -65,12 +69,15 @@
 
     wave chirpedSine_shuffle = chirpAmplitude_shuffle*chirp(chirpSamples_shuffle,1,startFreq_shuffle,stopFreq_shuffle, phase); //shuffle pulse
 
-    wave chirpedSine_reading = placeholder(chirpSamples_reading,true,true); //read-out pulse
-    wave Stark_Shift_Pulse = placeholder(chirpSamples_reading,true,true); //stark shift pulse
-    assignWaveIndex(1,chirpedSine_reading,3,Stark_Shift_Pulse,10);
+    wave chirpedSine_reading = placeholder(Stark_Samples_total,true,false); //read-out pulse
+    wave Stark_Shift_Pulse = ones(Stark_Samples_total);
 
+    assignWaveIndex(1, chirpedSine_reading, 3, Stark_Shift_Pulse, 4, Stark_Shift_Pulse, 10);
+    // assignWaveIndex(chirpedSine_reading, 10);
+    
     cvar i;
-    for(i = 0; i < Number_of_stark_shifts; i++){{
+
+    for(i = 0; i < Number_of_stark_shifts; i++) {{
         //// Pulse Sequence
 
         // Burning Pulses
@@ -116,7 +123,10 @@
         playZero(sample_delay_05);
 
         // Readout and Stark Shift Pulses
+        // setTrigger(1);
         executeTableEntry(i);
+        // setTrigger(0);
+        // playWave(1, chirpedSine_reading, 3, 4, Stark_Shift_Pulse);
 
         // Wait between readout and shuffle pulse
         const delay_06=20E-3;//s; time delay between the read-out pulse and shuffle pulse
