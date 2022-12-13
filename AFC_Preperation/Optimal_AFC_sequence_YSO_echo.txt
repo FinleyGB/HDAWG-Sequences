@@ -52,92 +52,109 @@
     const stopFreq_shuffle = (centre_freq_shuffle+freq_sweeping_shuffle)/sampling_rate;//Hz; ending frequency of the shuffling pulse
     const chirpSamples_shuffle =round(shuffle_duration*sampling_rate/16)*16;// Calculating sampling points
 
-    // Stark Shift Pulse Parameters
-    const Number_of_stark_shifts = {Number_of_stark_shifts}; // Number of stark shift E fields applied to the sample
-    const zero_pad_duration = {zero_pad_duration}; // s; time for electric field to turn on before reading pulse
-    const zero_pad_Samples = round(zero_pad_duration*sampling_rate/16)*16;
+    // AFC Pulse Train Parameters
+    const Number_of_AFC_pulses = {Number_of_AFC_pulses}; // Number of AFC pulse train repetitions
+    const AFC_duration = {AFC_duration}; //s; duration of the AFC pulse train
+    const samples_AFC = round(AFC_duration*sampling_rate/16)*16;
+    const time_between_pulses = {time_between_pulses}; //s; Time between each pulse in pulse train
+    const samples_between_pulses = round((time_between_pulses-AFC_duration)*sampling_rate/16)*16;
 
-    const Stark_Samples_total = 2*zero_pad_Samples + chirpSamples_reading;
+    // AFC Echo Pulse Parameters
+    const centre_freq_AFC_echo_sine = {centre_freq_AFC_echo_sine};  //Hz;Centre frequency of AFC echo pulses
+    const amplitude_AFC_echo = {amplitude_AFC_echo}; //V; Amplitde of AFC pulse train
+    const pulse_duration_AFC_echo = {pulse_duration_AFC_echo};    //s; Total time of AFC echo pulse
+    const gauss_pulse_width = {gauss_pulse_width};    // s; FWHM of echo pulse
+
 
     //// Waveform Definitions
 
-    wave chirpedSine_burning   = chirpAmplitude_burning*chirp(chirpSamples_burning,1,startFreq_burning,stopFreq_burning, phase); //burning pulse without marker appended
+    wave marker_left=marker(chirpSamples_reading/2,0);
+    wave marker_middle=marker(chirpSamples_reading/16,1);
+    wave marker_right=marker(chirpSamples_reading/2, 0);
+    wave w_marker=join(marker_left,marker_middle,marker_right);
 
+    wave chirpedSine_burning   = chirp(chirpSamples_burning,1,startFreq_burning,stopFreq_burning, phase); //burning pulse without marker appended
     wave chirpedSine_burning_back = chirpAmplitude_burning_back*chirp(chirpSamples_burning_back,1,startFreq_burning_back,stopFreq_burning_back, phase); //burnback pulse
-
     wave chirpedSine_cleaning = chirpAmplitude_cleaning*chirp(chirpSamples_cleaning,1,startFreq_cleaning,stopFreq_cleaning, phase); //burnback pulse 
-
+    wave chirpedSine_reading = chirpAmplitude_reading*chirp(chirpSamples_reading,1,startFreq_reading,stopFreq_reading, phase); //read-out pulse
     wave chirpedSine_shuffle = chirpAmplitude_shuffle*chirp(chirpSamples_shuffle,1,startFreq_shuffle,stopFreq_shuffle, phase); //shuffle pulse
 
-    wave chirpedSine_reading = placeholder(Stark_Samples_total,true,false); //read-out pulse
-    wave Stark_Shift_Pulse = ones(Stark_Samples_total);
+    wave AFC_pulse_train = placeholder(samples_AFC,false,false);
+    assignWaveIndex(1,AFC_pulse_train,10);
 
-    assignWaveIndex(1, chirpedSine_reading, 3, Stark_Shift_Pulse, 4, Stark_Shift_Pulse, 10);
-    // assignWaveIndex(chirpedSine_reading, 10);
-    
-    cvar i;
-    for(i = 0; i < Number_of_stark_shifts; i++) {{
-        //// Pulse Sequence
+    wave AFC_echo_sine = sine(samples_AFC_echo_sine, 1, phaseOffset_AFC_echo_sine, nrOfPeriods_AFC_echo_sine); 
+    wave AFC_echo_gauss=gauss(samples_AFC_echo_gauss, 1, samples_AFC_echo_gauss/2, samples_gauss_pulse_width);
+    wave AFC_input = amplitude_AFC_echo*multiply(AFC_echo_sine,AFC_echo_gauss) + w_marker;
 
-        // Burning Pulses
-        const delay_00 = 0.3E-3; //s; time delay between repeated burning pulses 
-        const sample_delay_00=round(delay_00*sampling_rate/16)*16;
+    //// Pulse Sequence
 
-        repeat (Number_of_burning_pulses) {{
-            playWave(chirpedSine_burning);
-            playZero(sample_delay_00);
-        }}
+    // Burning Pulses
+    const delay_00 = 0.3E-3; //s; time delay between repeated burning pulses 
+    const sample_delay_00=round(delay_00*sampling_rate/16)*16;
 
-        // Wait between burning and burning back pulses
-        const delay_01=0.3E-3; //s; time delay between the burning pulses and burn-back
-        const sample_delay_01=round(delay_01*sampling_rate/16)*16;
-        playZero(sample_delay_01);
-
-        // Burning Back Pulses
-        const delay_02 = 0.3E-3; //s; time delay between repeated burn-back pulses
-        const sample_delay_02=round(delay_02*sampling_rate/16)*16;
-
-        repeat(Number_of_burning_back_pulses) {{
-            playWave(chirpedSine_burning_back);
-            playZero(sample_delay_02);
-        }}
-
-        // Wait between burning back and cleaning pulses
-        const delay_03=0.3E-3; //s; time delay between the burn-back and clean pulses
-        const sample_delay_03=round(delay_03*sampling_rate/16)*16;
-        playZero(sample_delay_03);
-
-        // Cleaning Pulses
-        const delay_04 = 0.3E-3; //s; time delay between repeated clean pulses
-        const sample_delay_04=round(delay_04*sampling_rate/16)*16;
-
-        repeat(Number_of_cleaning_pulses){{
-            playWave(chirpedSine_cleaning);
-            playZero(sample_delay_04);
-        }}
-
-        // Wait between cleaning and Stark Shift Pulse
-        const delay_05=1E-3; //s; time delay between the clean and AFC pulse train
-        const sample_delay_05=round(delay_05*sampling_rate/16)*16;
-        playZero(sample_delay_05);
-
-        // Readout and Stark Shift Pulses
-        // setTrigger(1);
-        executeTableEntry(i);
-        // setTrigger(0);
-        // playWave(1, chirpedSine_reading, 3, 4, Stark_Shift_Pulse);
-
-        // Wait between readout and shuffle pulse
-        const delay_06=20E-3;//s; time delay between the read-out pulse and shuffle pulse
-        const sample_delay_06=round(delay_06*sampling_rate/16)*16;
-        playZero(sample_delay_06);
-
-        // Shuffle Pulse
-        playWave(chirpedSine_shuffle);
-
-        // Wait between shuffle pulse and burning pulse
-        const delay_07=40E-3;//s; time delay between the shuffle pulse and burning pulse
-        const sample_delay_07=round(delay_07*sampling_rate/16)*16;
-        playZero(sample_delay_07);
+    repeat (Number_of_burning_pulses) {{
+        playWave(chirpedSine_burning);
+        playZero(sample_delay_00);
     }}
+
+    // Wait between burning and burning back pulses
+    const delay_01=0.3E-3; //s; time delay between the burning pulses and burn-back
+    const sample_delay_01=round(delay_01*sampling_rate/16)*16;
+    playZero(sample_delay_01);
+
+    // Burning Back Pulses
+    const delay_02 = 0.3E-3; //s; time delay between repeated burn-back pulses
+    const sample_delay_02=round(delay_02*sampling_rate/16)*16;
+
+    repeat(Number_of_burning_back_pulses) {{
+        playWave(chirpedSine_burning_back);
+        playZero(sample_delay_02);
+    }}
+
+    // Wait between burning back and cleaning pulses
+    const delay_03=0.3E-3; //s; time delay between the burn-back and clean pulses
+    const sample_delay_03=round(delay_03*sampling_rate/16)*16;
+    playZero(sample_delay_03);
+
+    // Cleaning Pulses
+    const delay_04 = 0.3E-3; //s; time delay between repeated clean pulses
+    const sample_delay_04=round(delay_04*sampling_rate/16)*16;
+
+    repeat(Number_of_cleaning_pulses){{
+        playWave(chirpedSine_cleaning);
+        playZero(sample_delay_04);
+    }}
+
+    // Wait between cleaning and AFC pulse train
+    const delay_05=1E-3; //s; time delay between the clean and AFC pulse train
+    const sample_delay_05=round(delay_05*sampling_rate/16)*16;
+    playZero(sample_delay_05);
+
+    // AFC Pulse Train
+    const delay_AFC = 0.6E-3; //s; time delay between repeated clean pulses
+    const sample_delay_AFC=round(delay_AFC*sampling_rate/16)*16;
+
+    repeat(Number_of_AFC_pulses){{
+        playWave(AFC_pulse_train);
+        playZero(sample_delay_AFC);
+    }}
+
+    // Wait between AFC pulse train and AFC echo pulse
+    playZero(sample_delay_05);
+
+    // AFC Echo Pulse
+    playWave(AFC_input);
+
+    // Wait between AFC echo and shuffle pulse
+    const delay_06=20E-3;//s; time delay between the read-out pulse and shuffle pulse
+    const sample_delay_06=round(delay_06*sampling_rate/16)*16;
+    playZero(sample_delay_06);
+
+    // Shuffle Pulse
+    playWave(chirpedSine_shuffle);
+
+    // Wait between shuffle pulse and burning pulse
+    const delay_07=40E-3;//s; time delay between the shuffle pulse and burning pulse
+    const sample_delay_07=round(delay_07*sampling_rate/16)*16;
+    playZero(sample_delay_07);
 }}
