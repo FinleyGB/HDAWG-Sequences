@@ -7,7 +7,7 @@
     const phaseOffset = 0.0;
     const nrOfPeriods = pulse_duration*centre_freq; // Number of periods of sine inside the long pulse
     const samples=round(pulse_duration*sampling_rate/16)*16; // Calculating sampling points 
-
+    
     const centre_freq_shuffle={centre_freq_shuffle};//Hz; Central frequency of the shuffle pulse
     const chirpAmplitude_shuffle = {chirpAmplitude_shuffle};// V; amplitude of shuffling pulse
     const freq_sweeping_shuffle={freq_sweeping_shuffle};//Hz; set the scanning frequency range of shuffling pulse
