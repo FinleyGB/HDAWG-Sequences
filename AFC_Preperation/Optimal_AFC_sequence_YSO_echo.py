@@ -55,7 +55,13 @@ AFC_pulse_width = 500e-9 # s; Width of each pulse in the pulse train (defined fr
 AFC_pulse_width_samples = round(AFC_pulse_width*sampling_rate)
 time_between_pulses = 0.3e-3 # s; Time between reapeted AFC pulse train
 
-# Claculate Optimal AFC
+# AFC Echo Pulse Parameters
+centre_freq_AFC_echo_sine=247.6E6   # Hz;Centre frequency of AFC echo pulses
+amplitude_AFC_echo=0.21 # V; Amplitde of AFC pulse train
+pulse_duration_AFC_echo=1E-6    # s; Total time of AFC echo pulse
+gauss_pulse_width=200E-9    # s; FWHM of echo pulse
+
+# Calculate Optimal AFC
 
 OD = 1 # Optical depth of absorption
 tau = 5e-6 # Storage time of AFC
@@ -145,7 +151,13 @@ with open(HDAWG_filename, "r") as file:
         # AFC pulse train parameters
         Number_of_AFC_pulses = Number_of_AFC_pulses,
         AFC_duration = AFC_duration,
-        time_between_pulses = time_between_pulses
+        time_between_pulses = time_between_pulses,
+
+        # AFC Echo Parameters
+        centre_freq_AFC_echo_sine = centre_freq_AFC_echo_sine,
+        amplitude_AFC_echo = amplitude_AFC_echo,
+        pulse_duration_AFC_echo = pulse_duration_AFC_echo,
+        gauss_pulse_width = gauss_pulse_width
     )
 
 awgMod.compile(device, awg_program)

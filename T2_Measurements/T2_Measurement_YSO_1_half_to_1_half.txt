@@ -34,14 +34,28 @@
     const stopFreq_cleaning  = (centre_freq_cleaning+freq_sweeping_cleaning)/sampling_rate;//Hz; ending frequency of the burn-back
     const chirpSamples_cleaning = round(cleaning_duration*sampling_rate/16)*16;// Calculating sampling points
 
-    // Reading Pulse Parameters
-    const centre_freq_reading={centre_freq_reading};//Hz; Central frequency set to read out the burned spectral hole
-    const chirpAmplitude_reading = {chirpAmplitude_reading};// V; amplitude of reading-out pulse
-    const freq_sweeping_reading={freq_sweeping_reading};//Hz; set the scanning frequency range of reading-out pulse (the actual scanning range should be 4*freq_detuning) 1.32877326E6
-    const reading_duration={reading_duration}; //s; reading-out time
-    const startFreq_reading = (centre_freq_reading-freq_sweeping_reading)/sampling_rate;//Hz; starting frequency of the reading-out pulse
-    const stopFreq_reading = (centre_freq_reading+freq_sweeping_reading)/sampling_rate;//Hz; ending frequency of the reading-out pulse
-    const chirpSamples_reading = round(reading_duration*sampling_rate/16)*16;// Calculating sampling points 
+    // T2 measurement Parameters
+    const Number_of_T2_measurements = {Number_of_T2_measurements}; // Number of T2 measuremenets
+    const tau_start = {tau_start};  // s; initial time delay between pi/2 and pi pulses
+    const tau_stop = {tau_stop}; // s; final time delay between pi/2 and pi pulses
+    const tau_step = (tau_stop - tau_start)/Number_of_T2_measurements;  // s; time step between repeated T2 Measurements 
+
+    const centre_freq_pi={centre_freq_pi}; //Hz; Central frequency set to drive the AOM for pi/2 and pi pulses
+    const pi_pulse_duration={pi_pulse_duration}; //s; Pulse duration of pi pulse
+
+    // Pi/2 Pulse Parameters
+    const amplitude_half_pi = {amplitude_half_pi}; // V; amplitude of pi/2 pulse
+    const burning_time_half_pi = pi_pulse_duration/2; // s; Pulse duration of pi/2 pulse
+    const phaseOffset_half_pi = 0.0;
+    const nrOfPeriods_half_pi = burning_time_half_pi*centre_freq_pi; // Number of periods of sine inside pi/2 pulse
+    const samples_half_pi=round(burning_time_half_pi*sampling_rate/16)*16; // Calculating sampling points 
+
+    // Pi Pulse Parameters
+    const amplitude_pi = {amplitude_pi}; // V; amplitude of pi pulse
+    const burning_time_pi = pi_pulse_duration; // s; Pulse duration of pi pulse
+    const phaseOffset_pi = 0.0; 
+    const nrOfPeriods_pi = burning_time_pi*centre_freq_pi; // Number of periods of sine inside pi pulse
+    const samples_pi=round(burning_time_pi*sampling_rate/16)*16; // Calculating sampling points 
 
     // Shuffle Pulse Parameters
     const centre_freq_shuffle={centre_freq_shuffle};//Hz; Central frequency of the shuffle pulse
@@ -52,32 +66,24 @@
     const stopFreq_shuffle = (centre_freq_shuffle+freq_sweeping_shuffle)/sampling_rate;//Hz; ending frequency of the shuffling pulse
     const chirpSamples_shuffle =round(shuffle_duration*sampling_rate/16)*16;// Calculating sampling points
 
-    // Stark Shift Pulse Parameters
-    const Number_of_stark_shifts = {Number_of_stark_shifts}; // Number of stark shift E fields applied to the sample
-    const zero_pad_duration = {zero_pad_duration}; // s; time for electric field to turn on before reading pulse
-    const zero_pad_Samples = round(zero_pad_duration*sampling_rate/16)*16;
-
-    const Stark_Samples_total = 2*zero_pad_Samples + chirpSamples_reading;
-
-    //// Waveform Definitions
-
-    wave chirpedSine_burning   = chirpAmplitude_burning*chirp(chirpSamples_burning,1,startFreq_burning,stopFreq_burning, phase); //burning pulse without marker appended
-
-    wave chirpedSine_burning_back = chirpAmplitude_burning_back*chirp(chirpSamples_burning_back,1,startFreq_burning_back,stopFreq_burning_back, phase); //burnback pulse
-
-    wave chirpedSine_cleaning = chirpAmplitude_cleaning*chirp(chirpSamples_cleaning,1,startFreq_cleaning,stopFreq_cleaning, phase); //burnback pulse 
-
+    // Waveform Definitions
+    wave chirpedSine_burning = chirpAmplitude_burning*chirp(chirpSamples_burning,1,startFreq_burning,stopFreq_burning, phase); //burning pulse with marker appended
+    wave chirpedSine_burning_back = chirpAmplitude_burning_back*chirp(chirpSamples_burning_back,1,startFreq_burning_back,stopFreq_burning_back, phase); //burnback pulse 
+    wave sine_half_pi = amplitude_half_pi*sine(samples_half_pi, 1, phaseOffset_half_pi, nrOfPeriods_half_pi); // pi/2 pulse
+    wave sine_pi = amplitude_pi*sine(samples_pi, 1, phaseOffset_pi, nrOfPeriods_pi); // pi pulse
     wave chirpedSine_shuffle = chirpAmplitude_shuffle*chirp(chirpSamples_shuffle,1,startFreq_shuffle,stopFreq_shuffle, phase); //shuffle pulse
 
-    wave chirpedSine_reading = placeholder(Stark_Samples_total,true,false); //read-out pulse
-    wave Stark_Shift_Pulse = ones(Stark_Samples_total);
+    // Pulse Sequence
 
-    assignWaveIndex(1, chirpedSine_reading, 3, Stark_Shift_Pulse, 4, Stark_Shift_Pulse, 10);
-    // assignWaveIndex(chirpedSine_reading, 10);
-    
+    cvar k;
+    for(k = 0; k < Number_of_T2_measurements; k++){{
+        zeros_samples=round((tau_0+(k-1)*tau_step)*sampling_rate/16)*16;
+        wave time_delay=zeros(zeros_samples);
+        assignWaveIndex(1, time_delay, k);
+    }}
+
     cvar i;
-    for(i = 0; i < Number_of_stark_shifts; i++) {{
-        //// Pulse Sequence
+    for(i =0; i < Number_of_T2_measurements; i++){{
 
         // Burning Pulses
         const delay_00 = 0.3E-3; //s; time delay between repeated burning pulses 
@@ -116,18 +122,31 @@
             playZero(sample_delay_04);
         }}
 
-        // Wait between cleaning and Stark Shift Pulse
+        // Wait between cleaning and pi/2 pulse
         const delay_05=1E-3; //s; time delay between the clean and AFC pulse train
         const sample_delay_05=round(delay_05*sampling_rate/16)*16;
         playZero(sample_delay_05);
 
-        // Readout and Stark Shift Pulses
-        // setTrigger(1);
-        executeTableEntry(i);
-        // setTrigger(0);
-        // playWave(1, chirpedSine_reading, 3, 4, Stark_Shift_Pulse);
+        // Pi/2 Pulse
+        playWave(sine_half_pi);
 
-        // Wait between readout and shuffle pulse
+        // Wait between pi/2 and pi pulse
+        executeTableEntry(i);
+
+        // Pi Pulse
+        playWave(sine_pi);
+
+        // Wait Between pi and shuffle pulse
+        executeTableEntry(i);
+        setTrigger(1);
+
+        const delay_06=10E-6;//s; time delay between the echo and shuffle pulse
+        const sample_delay_06=round(delay_06*sampling_rate/16)*16;
+        playWave(sample_delay_06);
+
+        setTrigger(0);
+
+        // Wait between T2 echo and shuffle pulse
         const delay_06=20E-3;//s; time delay between the read-out pulse and shuffle pulse
         const sample_delay_06=round(delay_06*sampling_rate/16)*16;
         playZero(sample_delay_06);
