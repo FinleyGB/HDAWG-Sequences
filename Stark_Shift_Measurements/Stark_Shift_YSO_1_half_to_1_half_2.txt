@@ -70,7 +70,7 @@
     wave marker_right=marker(chirpSamples_reading/2, 0);
     wave w_marker=join(marker_left,marker_middle,marker_right);
 
-    wave zero_pad_Pulse = zeros(Stark_Samples_total);
+    wave zero_pad_Pulse = zeros(zero_pad_Samples);
 
     wave chirpedSine_burning   = chirpAmplitude_burning*chirp(chirpSamples_burning,1,startFreq_burning,stopFreq_burning, phase); //burning pulse without marker appended
 
@@ -83,10 +83,12 @@
 
     wave chirpedSine_shuffle = chirpAmplitude_shuffle*chirp(chirpSamples_shuffle,1,startFreq_shuffle,stopFreq_shuffle, phase); //shuffle pulse
 
-    wave Stark_Shift_Pulse = ones(chirpSamples_reading);
-    wave Stark_Shift_Pulse_zero_pad = join(zero_pad_Pulse,Stark_Shift_Pulse,zero_pad_Pulse);
+    // wave Stark_Shift_Pulse = ones(Stark_Samples_total);
 
-    assignWaveIndex(1, chirpedSine_reading_zero_pad, 2, Stark_Shift_Pulse_zero_pad, 4, Stark_Shift_Pulse_zero_pad, 10);
+    wave Stark_Shift_Pulse = ones(Stark_Samples_total);
+    // wave Stark_Shift_Pulse_zero_pad = join(zero_pad_Pulse,Stark_Shift_Pulse,zero_pad_Pulse);
+
+    assignWaveIndex(1, chirpedSine_reading_zero_pad, 2, Stark_Shift_Pulse, 3, Stark_Shift_Pulse, 4, Stark_Shift_Pulse, 10);
 
     cvar i;
 
