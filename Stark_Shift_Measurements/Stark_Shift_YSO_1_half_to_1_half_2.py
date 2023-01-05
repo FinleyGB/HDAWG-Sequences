@@ -157,7 +157,7 @@ awgMod.set_value(f"/{device}/triggers/out/0/source", 4) # set up trigger, Output
 # Setup output channels
 awgMod.set_value(f"/{device}/sigouts/0/on", 1) # Channel 1 is ON
 awgMod.set_value(f"/{device}/sigouts/1/on", 1) # Channel 2 is OFF
-awgMod.set_value(f"/{device}/sigouts/2/on", 1) # Channel 3 is ON
+awgMod.set_value(f"/{device}/sigouts/2/on", 0) # Channel 3 is ON
 awgMod.set_value(f"/{device}/sigouts/3/on", 1) # Channel 4 is OFF
 
-awgMod.set_value(f"/{device}/awgs/0/single",0) #Rerun sequence
+awgMod.set_value(f"/{device}/awgs/0/single",0) #Rerun sequence  
