@@ -52,6 +52,8 @@ Number_of_stark_shifts = 20 # Number of stark shift E fields applied to the samp
 rect_amplitude_min = 0  # V; Minimum amplitude sent to amplifier
 rect_amplitude_max = 1  # V; Maxmimum amplitude sent to amplifier
 
+zero_pad_duration = 1e-3 # s; Time for electric field to come on before reading pulse
+
 if command_table==1:
     # Save Location 
     save_directory = 'C:/HDAWG_control/measurements/libs/QPLser/ZI_HDAWG_Scripts/Command_Tables/'
@@ -139,7 +141,8 @@ with open(HDAWG_filename, "r") as file:
         # Stark Shift Pulse Parameters
         Number_of_stark_shifts = Number_of_stark_shifts,
         rect_amplitude_min = rect_amplitude_min,
-        rect_amplitude_max = rect_amplitude_max
+        rect_amplitude_max = rect_amplitude_max,
+        zero_pad_duration = zero_pad_duration
     )
 
 awgMod.compile(device, awg_program)
@@ -154,7 +157,7 @@ awgMod.set_value(f"/{device}/triggers/out/0/source", 4) # set up trigger, Output
 # Setup output channels
 awgMod.set_value(f"/{device}/sigouts/0/on", 1) # Channel 1 is ON
 awgMod.set_value(f"/{device}/sigouts/1/on", 1) # Channel 2 is OFF
-awgMod.set_value(f"/{device}/sigouts/2/on", 1) # Channel 3 is ON
+awgMod.set_value(f"/{device}/sigouts/2/on", 0) # Channel 3 is ON
 awgMod.set_value(f"/{device}/sigouts/3/on", 1) # Channel 4 is OFF
 
-awgMod.set_value(f"/{device}/awgs/0/single",0) #Rerun sequence
+awgMod.set_value(f"/{device}/awgs/0/single",0) #Rerun sequence  
