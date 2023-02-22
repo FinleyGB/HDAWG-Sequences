@@ -1,4 +1,3 @@
-import zhinst.utils as zu
 import numpy as np
 import os
 from measurements.libs.QPLser.AWGmanager import HDAWG_PLser
@@ -18,41 +17,41 @@ sampling_rate = 2.4E9 # Hz; Sampling rate, should be the same as what you set on
 Number_of_burning_pulses = 300 # Number of burning pulse repetitions
 centre_freq_burning = 250E6 #Hz; Central frequency set to drive the AOM for burning
 chirpAmplitude_burning = 0.10 # V; amplitude of burning pulse
-freq_sweeping_burning=3.5E6 # Hz; set the scanning frequency range of burning pulse (the actual scanning range should be 4*freq_detuning)
-burning_duration=0.6e-3 # s; burning time
+freq_sweeping_burning = 3E6 # Hz; set the scanning frequency range of burning pulse (the actual scanning range should be 4*freq_detuning)
+burning_duration = 0.6e-3 # s; burning time
 
 # Burning back Pulse Parameters
 Number_of_burning_back_pulses = 200 # Number of burn-back pulse repetitions 
-centre_freq_burning_back=263.75E6 # Hz; Central frequency set to drive the AOM for burn-back
-chirpAmplitude_burning_back = 0.047 # V; amplitude of burn-back
-freq_sweeping_burning_back=0.8e6 # Hz; set the scanning frequency range of burn-back (the actual scanning range should be 4*freq_detuning)
-burning_back_duration=0.1e-3 # s; burning time burn-back
+centre_freq_burning_back = 268.45E6 # Hz; Central frequency set to drive the AOM for burn-back
+chirpAmplitude_burning_back = 0#0.025 # V; amplitude of burn-back
+freq_sweeping_burning_back = 0 # Hz; set the scanning frequency range of burn-back (the actual scanning range should be 4*freq_detuning)
+burning_back_duration = 0.1e-3 # s; burning time burn-back
 
 # Cleaning Pulse Parameters
 Number_of_cleaning_pulses = 260 # Number of clean pulse repetitions 
 centre_freq_cleaning=252.7E6 # Hz; Central frequency set to drive the AOM for cleaning
-chirpAmplitude_cleaning = 0.05 #  V; amplitude of cleaning
+chirpAmplitude_cleaning = 0 #  V; amplitude of cleaning
 freq_sweeping_cleaning=1E6 # Hz; set the scanning frequency range of cleaning (the actual scanning range should be 4*freq_detuning)
 cleaning_duration=0.5e-3 # s; burning time cleaning
 
 # Reading Pulse Parameters
 centre_freq_reading=250E6 # Hz; Central frequency set to read out the burned spectral hole
-chirpAmplitude_reading = 0.03 # V; amplitude of reading-out pulse
-freq_sweeping_reading=5E6 # Hz; set the scanning frequency range of reading-out pulse (the actual scanning range should be 4*freq_detuning) 1.32877326E6
+chirpAmplitude_reading = 0.025#0.03 # V; amplitude of reading-out pulse
+freq_sweeping_reading=2E6 # Hz; set the scanning frequency range of reading-out pulse (the actual scanning range should be 4*freq_detuning) 1.32877326E6
 reading_duration = 4e-3 # s; reading-out time
 
 # Shuffle Pulse Parameters
 centre_freq_shuffle=250E6 # Hz; Central frequency of the shuffle pulse
 chirpAmplitude_shuffle = 0.21 # V; amplitude of shuffling pulse
 freq_sweeping_shuffle=20E6 # Hz; set the scanning frequency range of shuffling pulse
-shuffle_duration=10e-3 # s; shuffling time
-
+shuffle_duration=100e-6 # s; shuffling time
+-+
 # Stark Shift Pulse Parameters
 Number_of_stark_shifts = 20 # Number of stark shift E fields applied to the sample
 rect_amplitude_min = 0  # V; Minimum amplitude sent to amplifier
-rect_amplitude_max = 1  # V; Maxmimum amplitude sent to amplifier
+rect_amplitude_max = 0  # V; Maxmimum amplitude sent to amplifier
 
-zero_pad_duration = 1e-3 # s; Time for electric field to come on before reading pulse
+zero_pad_duration = 5e-6 # s; Time for electric field to come on before reading pulse
 
 if command_table==1:
     # Save Location 
@@ -71,7 +70,7 @@ if command_table==1:
     # Write the index assigning
 
     a = np.linspace(rect_amplitude_min,rect_amplitude_max,Number_of_stark_shifts)
-
+    # a = [1,1,1,1]
 
     for i in range(0, len(a)): 
         f.write('\t'+'{' + '\n'
@@ -152,12 +151,13 @@ awgMod.upload_command_table(device, command_table='CT_Stark_shift_YSO_1_half_to_
 
 awgMod.set_value(f"/{device}/sines/0/enables/0", 0)
 
-awgMod.set_value(f"/{device}/triggers/out/0/source", 4) # set up trigger, Output 1&2 Marker 1
+awgMod.set_value(f"/{device}/triggers/out/0/source", 4) # set up marker, AWG core 1, Marker 1
+# awgMod.set_value(f"/{device}/triggers/out/1/source", 1) # set up trigger, AWG core 1, trigger 2
 
 # Setup output channels
 awgMod.set_value(f"/{device}/sigouts/0/on", 1) # Channel 1 is ON
-awgMod.set_value(f"/{device}/sigouts/1/on", 1) # Channel 2 is OFF
-awgMod.set_value(f"/{device}/sigouts/2/on", 0) # Channel 3 is ON
-awgMod.set_value(f"/{device}/sigouts/3/on", 1) # Channel 4 is OFF
+awgMod.set_value(f"/{device}/sigouts/1/on", 1) # Channel 2 is ON
+awgMod.set_value(f"/{device}/sigouts/2/on", 1) # Channel 3 is ON
+awgMod.set_value(f"/{device}/sigouts/3/on", 1) # Channel 4 is ON
 
 awgMod.set_value(f"/{device}/awgs/0/single",0) #Rerun sequence  

@@ -41,6 +41,8 @@
     const reading_duration={reading_duration}; //s; reading-out time
     const startFreq_reading = (centre_freq_reading-freq_sweeping_reading)/sampling_rate;//Hz; starting frequency of the reading-out pulse
     const stopFreq_reading = (centre_freq_reading+freq_sweeping_reading)/sampling_rate;//Hz; ending frequency of the reading-out pulse
+    // const stopFreq_reading = (centre_freq_reading-freq_sweeping_reading)/sampling_rate;//Hz; ending frequency of the reading-out pulse for reverse direction
+    // const startFreq_reading = (centre_freq_reading+freq_sweeping_reading)/sampling_rate;//Hz; starting frequency of the reading-out pulse for reverse direction
     const chirpSamples_reading = round(reading_duration*sampling_rate/16)*16;// Calculating sampling points 
 
     // Shuffle Pulse Parameters
@@ -54,7 +56,7 @@
 
     // Stark Shift Pulse Parameters
     const Number_of_stark_shifts = {Number_of_stark_shifts}; // Number of stark shift E fields applied to the sample
-    const rect_amplitude_min = {rect_amplitude_max}; // V; Min amplitude of stark shift pulse
+    const rect_amplitude_min = {rect_amplitude_min}; // V; Min amplitude of stark shift pulse
     const rect_amplitude_max = {rect_amplitude_max}; // V; Max amplitude of stark shift pulse
     const Stark_Shift_step = (rect_amplitude_max-rect_amplitude_min)/Number_of_stark_shifts;
 
@@ -65,7 +67,7 @@
 
     //// Waveform Definitions
 
-    wave marker_left=marker(chirpSamples_reading/2,0);
+    wave marker_left=marker(chirpSamples_reading*7/16,0);
     wave marker_middle=marker(chirpSamples_reading/16,1);
     wave marker_right=marker(chirpSamples_reading/2, 0);
     wave w_marker=join(marker_left,marker_middle,marker_right);
@@ -88,7 +90,7 @@
     wave Stark_Shift_Pulse = ones(Stark_Samples_total);
     // wave Stark_Shift_Pulse_zero_pad = join(zero_pad_Pulse,Stark_Shift_Pulse,zero_pad_Pulse);
 
-    assignWaveIndex(1, chirpedSine_reading_zero_pad, 2, Stark_Shift_Pulse, 3, Stark_Shift_Pulse, 4, Stark_Shift_Pulse, 10);
+    assignWaveIndex(1, chirpedSine_reading_zero_pad, 2, Stark_Shift_Pulse, 3, zeros(Stark_Samples_total), 4, Stark_Shift_Pulse, 10);
 
     cvar i;
 
@@ -135,7 +137,8 @@
         // Wait between cleaning and Stark Shift Pulse
         const delay_05=1E-3; //s; time delay between the clean and AFC pulse train
         const sample_delay_05=round(delay_05*sampling_rate/16)*16;
-        playZero(sample_delay_05);
+        // playZero(sample_delay_05);
+        playWave(3,(i/Number_of_stark_shifts)*ones(sample_delay_05));
 
         // Readout and Stark Shift Pulses
         executeTableEntry(i);
